@@ -6,16 +6,30 @@ var browserify = require('browserify');
 var watchify = require('watchify');
 var reactify = require('reactify');
 var streamify = require('gulp-streamify');
+var sass = require('gulp-sass');
+var sourcemaps = require('gulp-sourcemaps');
+var rename = require('gulp-rename');
 
 var path = {
   HTML: 'src/index.html',
   MINIFIED_OUT: 'build.min.js',
   OUT: 'build.js',
+  CSS_OUT: 'styles.css',
+  SASS_IN: './src/sass/manifest.scss',
   DEST: 'dist',
   DEST_BUILD: 'dist/build',
   DEST_SRC: 'dist/src',
   ENTRY_POINT: './src/js/App.js'
 };
+
+gulp.task('build-css', function() {
+  return gulp.src(path.SASS_IN)
+    .pipe(sourcemaps.init())
+    .pipe(sass())
+    .pipe(sourcemaps.write())
+    .pipe(rename(path.CSS_OUT)) 
+    .pipe(gulp.dest(path.DEST_SRC));
+});
 
 gulp.task('copy', function(){
   gulp.src(path.HTML)
@@ -24,6 +38,8 @@ gulp.task('copy', function(){
 
 gulp.task('watch', function() {
   gulp.watch(path.HTML, ['copy']);
+  gulp.watch('src/sass/**/*.scss', ['build-css']);
+
 
   var watcher  = watchify(browserify({
     entries: [path.ENTRY_POINT],
