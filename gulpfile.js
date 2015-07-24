@@ -14,6 +14,7 @@ var del = require('del'); // to delete old files and replace with hashed names
 var vinylPaths = require('vinyl-paths');
 var debug = require('gulp-debug');
 var es = require('event-stream'); // node module
+var fs = require('fs');
 
 var path = {
   HTML: 'src/index.html',
@@ -92,8 +93,21 @@ gulp.task('replaceHTML', function(){
 });
 
 gulp.task('getFileNames', function(){
-  
-  gulp.src(path.DEST_BUILD + '/*')
+  var dir = path.DEST_SRC;
+  var results = [];
+  fs.readdirSync(dir).forEach(function(file) {
+      // console.log(file);
+      file = dir+'/'+file;
+      console.log(file);
+      // var stat = filesystem.statSync(file);
+      // console.log(stat);
+      // if (stat && stat.isDirectory()) {
+      //     results = results.concat(_getAllFilesFromFolder(file))
+      // } else results.push(file);
+      // results.push(file);
+  });
+  // return results;
+  // gulp.src(path.DEST_BUILD + '/*')
   // .pipe( log.data(data.path)
 
 })
