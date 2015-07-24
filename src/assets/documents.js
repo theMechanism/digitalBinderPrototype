@@ -1,8 +1,11 @@
 // PLACEHOLDER -- dynamically gens JSON 
 
 var Faker = require('faker');
+var _ = require('lodash');
 
 function mockDocuments(num){
+  var forceImageChange = Object.getOwnPropertyNames(Faker.image);
+
 
   var articles = [];
   for (var i = 1; i < num; i++) {
@@ -14,10 +17,11 @@ function mockDocuments(num){
         content: Faker.lorem.paragraph()
       });
     }
+    var randImg = _.sample(forceImageChange);
     articles.push({
       id: i,
       title: Faker.name.title(),
-      pdf: Faker.image.technics(),
+      pdf: Faker.image[randImg](),
       abstract: abtractParagraphs,
       summary: Faker.lorem.sentences(randomInt(2,10)).split('\n')
     });
