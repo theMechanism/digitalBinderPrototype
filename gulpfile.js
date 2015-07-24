@@ -10,6 +10,10 @@ var sass = require('gulp-sass');
 var sourcemaps = require('gulp-sourcemaps');
 var rename = require('gulp-rename');
 var rev = require('gulp-rev'); // adds hash to suffix to avoid caching problems
+var del = require('del'); // to delete old files and replace with hashed names
+var vinylPaths = require('vinyl-paths');
+var debug = require('gulp-debug');
+var es = require('event-stream'); // node module
 
 var path = {
   HTML: 'src/index.html',
@@ -74,7 +78,6 @@ gulp.task('build', function(){
   })
     .bundle()
     .pipe(source(path.MINIFIED_OUT))
-    // .pipe(rev())
     .pipe(streamify(uglify(path.MINIFIED_OUT)))
     .pipe(streamify(rev()))
     .pipe(gulp.dest(path.DEST_BUILD));
@@ -88,6 +91,19 @@ gulp.task('replaceHTML', function(){
     .pipe(gulp.dest(path.DEST));
 });
 
-gulp.task('production', ['replaceHTML', 'build']);
+gulp.task('getFileNames', function(){
+  
+  gulp.src(path.DEST_BUILD + '/*')
+  // .pipe( log.data(data.path)
+
+})
+
+gulp.task('clearOld:builds.min', function () {
+  del([
+    path.DEST_BUILD + '/*'
+  ]);
+});
+
+gulp.task('production', ['clearOld:builds.min', 'build', 'replaceHTML']);
 
 gulp.task('default', ['watch']);
