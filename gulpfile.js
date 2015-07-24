@@ -35,8 +35,7 @@ gulp.task('build-css', function() {
     .pipe(sourcemaps.init())
     .pipe(sass())
     .pipe(sourcemaps.write())
-    .pipe(rename(path.CSS_OUT))
-    .pipe(rev()) 
+    .pipe(rename(path.CSS_OUT)) 
     .pipe(gulp.dest(path.DEST_SRC));
 });
 
@@ -75,7 +74,9 @@ gulp.task('build', function(){
   })
     .bundle()
     .pipe(source(path.MINIFIED_OUT))
+    // .pipe(rev())
     .pipe(streamify(uglify(path.MINIFIED_OUT)))
+    .pipe(streamify(rev()))
     .pipe(gulp.dest(path.DEST_BUILD));
 });
 
