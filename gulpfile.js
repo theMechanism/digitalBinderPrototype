@@ -14,13 +14,15 @@ var del = require('del'); // to delete old files and replace with hashed names
 var vinylPaths = require('vinyl-paths');
 var debug = require('gulp-debug');
 var es = require('event-stream'); // node module
-var fs = require('fs');
+
+var nodeUtils = require('./customNodeUtils');
 
 var path = {
   HTML: 'src/index.html',
   MINIFIED_OUT: 'build.min.js',
   OUT: 'build.js',
   CSS_OUT: 'styles.css',
+  CSS_MIN_OUT: 'styles.min.css',
   SASS_IN: './src/sass/manifest.scss',
   DEST: 'dist',
   DEST_BUILD: 'dist/build',
@@ -29,12 +31,12 @@ var path = {
 };
 
 gulp.task('hashify-assets', function () {
-    return gulp.src('dist/src/*.css')
-        .pipe(rev())
-        .pipe(gulp.dest('dist/src'));
+  return gulp.src('dist/src/*.css')
+      .pipe(rev())
+      .pipe(gulp.dest('dist/src'));
 });
 
-gulp.task('build-css', function() {
+gulp.task('dev-css', function() {
   
   return gulp.src(path.SASS_IN)
     .pipe(sourcemaps.init())
@@ -44,6 +46,20 @@ gulp.task('build-css', function() {
     .pipe(gulp.dest(path.DEST_SRC));
 });
 
+
+gulp.task('build-css',['clearOld:builds.min'], function(cb) {
+  
+  return gulp.src(path.SASS_IN)
+    // .pipe(sourcemaps.init())
+    .pipe(sass())
+    // .pipe(sourcemaps.write())
+    .pipe(rename(path.CSS_MIN_OUT))
+    .pipe(streamify(rev())) 
+    .pipe(gulp.dest(path.DEST_BUILD));
+    cb(err);
+});
+
+
 gulp.task('copy', function(){
   gulp.src(path.HTML)
     .pipe(gulp.dest(path.DEST));
@@ -51,7 +67,7 @@ gulp.task('copy', function(){
 
 gulp.task('watch', function() {
   gulp.watch(path.HTML, ['copy']);
-  gulp.watch('src/sass/**/*.scss', ['build-css']);
+  gulp.watch('src/sass/**/*.scss', ['dev-css']);
 
 
   var watcher  = watchify(browserify({
@@ -72,7 +88,7 @@ gulp.task('watch', function() {
     .pipe(gulp.dest(path.DEST_SRC));
 });
 
-gulp.task('build', function(){
+gulp.task('buildjs',['clearOld:builds.min'], function(cb){
   browserify({
     entries: [path.ENTRY_POINT],
     transform: [reactify],
@@ -82,42 +98,34 @@ gulp.task('build', function(){
     .pipe(streamify(uglify(path.MINIFIED_OUT)))
     .pipe(streamify(rev()))
     .pipe(gulp.dest(path.DEST_BUILD));
+    cb();
 });
 
+
+// right now, js compression takes super long -- and the replace html must wait til its done... or fails!
+
 gulp.task('replaceHTML', function(){
+
+  var newPaths = nodeUtils.getFileNames(path.DEST_BUILD);
   gulp.src(path.HTML)
     .pipe(htmlreplace({
-      'js': 'build/' + path.MINIFIED_OUT
+      'js': 'build/' + newPaths[0],
+      'css': 'build/' + newPaths[1]
     }))
     .pipe(gulp.dest(path.DEST));
 });
 
-gulp.task('getFileNames', function(){
-  var dir = path.DEST_SRC;
-  var results = [];
-  fs.readdirSync(dir).forEach(function(file) {
-      // console.log(file);
-      file = dir+'/'+file;
-      console.log(file);
-      // var stat = filesystem.statSync(file);
-      // console.log(stat);
-      // if (stat && stat.isDirectory()) {
-      //     results = results.concat(_getAllFilesFromFolder(file))
-      // } else results.push(file);
-      // results.push(file);
-  });
-  // return results;
-  // gulp.src(path.DEST_BUILD + '/*')
-  // .pipe( log.data(data.path)
 
-})
-
-gulp.task('clearOld:builds.min', function () {
+gulp.task('clearOld:builds.min', function (cb) {
   del([
     path.DEST_BUILD + '/*'
-  ]);
+  ], cb);
 });
 
-gulp.task('production', ['clearOld:builds.min', 'build', 'replaceHTML']);
+
+// sequence is important here--- explore
+gulp.task('production', ['build-css', 'buildjs']);
+
+gulp.task('replacePostBuild', ['replaceHTML'])
 
 gulp.task('default', ['watch']);
