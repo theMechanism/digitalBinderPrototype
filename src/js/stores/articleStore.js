@@ -4,20 +4,26 @@ var _ = require('lodash');
 var _articles = {};
 var _mappedToSearchable = {};
 
-function Set(words){
+window.testWords = ['word', 'word', 'word', 'turd', 'gerd', 'haveYouHeard', 'bird', 'bird', 'turd'];
+
+function WordSet(words){
 	var self = this;
 	this._set = {};
-	
-	// build set on init
-	_.forEach(words, function(word){
-		self._set[word] = true;
-	});
 
-	self.contains = function(word){
+	this.addTo = function(words){
+		_.forEach(words, function(word){
+			self._set[word] = true;
+		});
+	}
+	
+	this.contains = function(word){
 		return self._set.hasOwnProperty(word);
 	}
 
+	// build set on init
+	this.addTo(words);
 }
+
 function mapSearchableTextToSet(words){
 	// accepts strings or arrays?
 	// start w arrays
@@ -48,5 +54,5 @@ var ArticleStore = {
 
 module.exports = {
 	ArticleStore: ArticleStore,
-	Set: Set
+	WordSet: WordSet
 }

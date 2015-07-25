@@ -6,6 +6,6 @@ var DigitalBinder = require('./components/digitalBinder');
 var mockDocs = require('./../assets/documents');
 
 window.Faker = require('faker');
-window.Set = require('./stores/articleStore').Set;
+window.WordSet = require('./stores/articleStore').WordSet;
 
 React.render(<DigitalBinder articles={mockDocs(6)} />, document.getElementById('app'));
