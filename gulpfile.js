@@ -113,6 +113,15 @@ gulp.task('replaceHTML', function(){
     .pipe(gulp.dest(path.DEST));
 });
 
+gulp.task('replaceDevHTML', function(){
+  gulp.src(path.HTML)
+    .pipe(htmlreplace({
+      'js': 'src/' + path.OUT,
+      'css': 'src/' + path.CSS_OUT
+    }))
+    .pipe(gulp.dest(path.DEST));
+});
+
 
 gulp.task('clearOld:builds.min', function (cb) {
   del([
@@ -126,4 +135,4 @@ gulp.task('production', ['build-css', 'buildjs']);
 
 gulp.task('replacePostBuild', ['replaceHTML'])
 
-gulp.task('default', ['watch']);
+gulp.task('default', ['replaceDevHTML', 'watch']);
