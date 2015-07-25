@@ -32,8 +32,8 @@ var path = {
 
 gulp.task('hashify-assets', function () {
   return gulp.src('dist/src/*.css')
-      .pipe(rev())
-      .pipe(gulp.dest('dist/src'));
+    .pipe(rev())
+    .pipe(gulp.dest('dist/src'));
 });
 
 gulp.task('dev-css', function() {
@@ -50,9 +50,7 @@ gulp.task('dev-css', function() {
 gulp.task('build-css',['clearOld:builds.min'], function(cb) {
   
   return gulp.src(path.SASS_IN)
-    // .pipe(sourcemaps.init())
     .pipe(sass())
-    // .pipe(sourcemaps.write())
     .pipe(rename(path.CSS_MIN_OUT))
     .pipe(streamify(rev())) 
     .pipe(gulp.dest(path.DEST_BUILD));
